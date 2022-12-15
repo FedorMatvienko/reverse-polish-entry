@@ -4,7 +4,7 @@
 using namespace std;
 namespace iss
 {
-    bool findOperator( string s)
+    bool findOperator( string s )
     {
         if ( s == ")" ) return true;
         if ( s == "(" ) return true;
@@ -14,6 +14,11 @@ namespace iss
         if ( s == "||" ) return true;
         if ( s == "-" || s == "+" ) return true;
         return false;
+    }
+    bool ignore( string s)
+    {
+        if ( s == "(" || s == ")" ) return false;
+        return true;
     }
     unsigned int priority( string s )
     {
@@ -54,18 +59,26 @@ public:
 //reverse polish entry - обратная польская запись
 int main()
 {
-    string inStr = "a<10&&b > (-10) || ( a == 10 && b == 10)";
+    string inStr = "a < 10&&b>=(+10) ||( a == 10 && b == 10)";
     string str = inStr + " ";
     string newStr;
     vector<pars> stack;
     string buf;
     string name;
-    bool sign;
+    bool sign = false;
 
     for ( int i = 0; i < str.size(); ++i )
     {
-        if ( iss::findOperator(buf) )
+        if ( buf.size() && !iss::findOperator(buf + str[i]) )
         {
+            if ( sign && iss::ignore(buf) )
+            {
+                newStr = newStr + "0 ";
+            }
+            if ( iss::ignore(buf) )
+            {
+                sign = true;
+            }
             stack.push_back(pars(buf,iss::priority(buf)));
             buf.clear();
         }
@@ -74,6 +87,7 @@ int main()
             buf += str[i];
             if ( !name.empty() )
             {
+                sign = false;
                 newStr = newStr + name + " ";
                 name.clear();
             }
